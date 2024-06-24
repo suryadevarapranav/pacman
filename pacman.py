@@ -23,8 +23,13 @@ color = 'blue'
 # flicker the powerup points.
 flicker = False
 
-# turns allowed for a player at any position
+# turns allowed for a player at any position: Right, Left, Up, Down.
 turns_allowed = [False, False, False, False]
+
+direction_command = 0
+
+# player speed
+player_speed = 2
 
 player_images=[]
 for i in range(1, 5):
@@ -188,6 +193,19 @@ def check_position(centerx, centery):
     return turns
 
 
+# moving the player, we can move in the direction we're moving as long as there isn't a collision. :)
+def move_player(play_x, play_y):
+    # r, l, u, d
+    if direction == 0 and turns_allowed[0]:
+        play_x += player_speed
+    elif direction == 1 and turns_allowed[1]:
+        play_x -= player_speed
+    if direction == 2 and turns_allowed[2]:
+        play_y -= player_speed
+    elif direction == 3 and turns_allowed[3]:
+        play_y += player_speed
+
+    return play_x, play_y
 
 
 
@@ -210,27 +228,51 @@ while run:
     draw_board(level)  # draw the pac-man level board.
     draw_player() # player in the house!!!
 
-    # pass in the cener position of the player,
+    # pass in the center position of the player,
     center_x = player_x + 23
     center_y = player_y + 24
     # pygame.draw.circle(screen, 'red', (center_x, center_y), 2) # mark the center of the player pos.
 
     turns_allowed = check_position(center_x, center_y) # check for player pos and see if he's colliding based on that whether an action is possible.
+    player_x, player_y = move_player(player_x, player_y)
 
     # Condition to exit the infinite while loop.
     for event in pygame.event.get():  # Built-in event handling the pygame module has.
         if event.type == pygame.QUIT:  # pygme.QUIT is the Cross button to close the window.
             run = False
 
+        # get a joystick feel, don't change the direction right away, whatever key we hold down last should be in control.
+        # direction_command will be conditional and won't be as instant in changing the direction.
         if event.type == pygame.KEYDOWN: # key press event.
             if event.key == pygame.K_RIGHT:
-                direction = 0
+                direction_command = 0
             elif event.key == pygame.K_LEFT:
-                direction = 1
+                direction_command = 1
             elif event.key == pygame.K_UP:
-                direction = 2
+                direction_command = 2
             elif event.key == pygame.K_DOWN:
-                direction = 3
+                direction_command = 3
+
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_RIGHT and direction_command == 0:  # and the last direction command was for that key.
+                direction_command = direction
+            if event.key == pygame.K_LEFT and direction_command == 1:
+                direction_command = direction
+            if event.key == pygame.K_UP and direction_command == 2:
+                direction_command = direction
+            if event.key == pygame.K_DOWN and direction_command == 3:
+                direction_command = direction
+
+    for i in range(4):
+        if direction_command == i and turns_allowed[i]:
+            direction = i
+
+
+    # player moves across the screen
+    if player_x > 900:
+        player_x = -47
+    elif player_x < -50:
+        player_x = 897
 
     pygame.display.flip()
 
