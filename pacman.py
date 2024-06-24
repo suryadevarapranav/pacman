@@ -24,7 +24,6 @@ color = 'blue'
 flicker = False
 
 # turns allowed for a player at any position
-# R, L, U, D.
 turns_allowed = [False, False, False, False]
 
 player_images=[]
@@ -55,50 +54,50 @@ def draw_board(lvl):
                 pygame.draw.circle(screen, 'white', (j * num2 + (0.5 * num2), i * num1 + (0.5 * num1)), 4) # Small dot
             elif lvl[i][j] == 2 and not flicker:
                 pygame.draw.circle(screen, 'white', (j * num2 + (0.5 * num2), i * num1 + (0.5 * num1)), 10) # Large dot
-            
+
             # draw.line takes in the start and the finish coordinates.
-            
+
             elif lvl[i][j] == 3:
                 # Vertical line
-                pygame.draw.line(screen, color, (j * num2 + (0.5 * num2), i * num1), 
+                pygame.draw.line(screen, color, (j * num2 + (0.5 * num2), i * num1),
                                  (j * num2 + (0.5 * num2), i * num1 + num1), 3) # x stays the same but y is entire block start and finish.
             elif lvl[i][j] == 4:
                 # Horizontal line
-                pygame.draw.line(screen, color, (j * num2, i * num1 + (0.5 * num1)), 
+                pygame.draw.line(screen, color, (j * num2, i * num1 + (0.5 * num1)),
                                  (j * num2 + num2, i * num1 + (0.5 * num1)), 3)  # y stays the same but x is entire block start and finish.
             elif lvl[i][j] == 9: # Ghost Door.
                 # Horizontal line except that it's white, doesn't allow the player to move. logic difference only.
-                pygame.draw.line(screen, 'white', (j * num2, i * num1 + (0.5 * num1)), 
+                pygame.draw.line(screen, 'white', (j * num2, i * num1 + (0.5 * num1)),
                                  (j * num2 + num2, i * num1 + (0.5 * num1)), 3)
 
             # draw.arc rectangle the arc exists in, because 5, 6, 7, 8 are just flips of each other.
             # x start, y start and total width, total height.
 
             elif lvl[i][j] == 5:
-                # pygame.draw.arc(screen, color, [(j * num2 - (0.5 * num2)), (i * num1 + (0.5 * num1)), num2, num1], 0, PI/2, 3) 
+                # pygame.draw.arc(screen, color, [(j * num2 - (0.5 * num2)), (i * num1 + (0.5 * num1)), num2, num1], 0, PI/2, 3)
                 # these titled a bit towards left so went with this implementation to make it better.
 
-                pygame.draw.arc(screen, color, 
-                                [(j * num2 - (0.4 * num2) - 2), 
-                                 (i * num1 + (0.5 * num1)), 
+                pygame.draw.arc(screen, color,
+                                [(j * num2 - (0.4 * num2) - 2),
+                                 (i * num1 + (0.5 * num1)),
                                  num2, num1], 0, PI/2, 3)
-            
+
             elif lvl[i][j] == 6:
-                pygame.draw.arc(screen, color, 
-                                [(j * num2 + (0.5 * num2)), 
-                                 (i * num1 + (0.5 * num1)), 
+                pygame.draw.arc(screen, color,
+                                [(j * num2 + (0.5 * num2)),
+                                 (i * num1 + (0.5 * num1)),
                                  num2, num1], PI/2, PI, 3)
 
             elif lvl[i][j] == 7:
-                pygame.draw.arc(screen, color, 
-                                [(j * num2 + (0.5 * num2)), 
-                                 (i * num1 - (0.4 * num1)), 
+                pygame.draw.arc(screen, color,
+                                [(j * num2 + (0.5 * num2)),
+                                 (i * num1 - (0.4 * num1)),
                                  num2, num1], PI, 3*PI/2, 3)
-            
+
             elif lvl[i][j] == 8:
-                pygame.draw.arc(screen, color, 
-                                [(j * num2 - (0.4 * num2) - 2), 
-                                 (i * num1 - (0.4 * num1)), 
+                pygame.draw.arc(screen, color,
+                                [(j * num2 - (0.4 * num2) - 2),
+                                 (i * num1 - (0.4 * num1)),
                                  num2, num1], 3*PI/2, 2*PI, 3)
 
 
@@ -119,6 +118,74 @@ def draw_player():
         screen.blit(pygame.transform.rotate(player_images[counter // 5], -90), (player_x, player_y))
 
 
+def check_position(centerx, centery):
+    # possible turns at any point.
+    # directions RIGHT, LEFT, UP, DOWN
+    turns = [False, False, False, False]
+
+    num1 = (HEIGHT - 50) // 32
+    num2 = (WIDTH // 30)
+    num3 = 15 # fudge factor, since the player himself isn't a 45X45 square.
+
+    # check collisions based on center x and center y of player +/- fudge number.
+
+    """check if it's possible to go back in the direction you came from."""
+    if centerx // 30 < 29: # once we're in spot 0 or spot 29, we're going either through the wall or going backwards.
+        if direction == 0: # right
+            # can turn if the tile is 0, 1, 2
+            if level[centery // num1][(centerx - num3) // num2] < 3: # row we're in based on y and column based on the x.
+                turns[1] = True
+        if direction == 1: #
+            if level[centery // num1][(centerx + num3) // num2] < 3:
+                turns[0] = True
+        if direction == 2:
+            if level[(centery + num3) // num1][(centerx) // num2] < 3:
+                turns[3] = True
+        if direction == 3:
+            if level[(centery - num3) // num1][(centerx) // num2] < 3:
+                turns[2] = True
+
+    # can only turn if we're at the mid-point.
+    # fudge just to make the collisions look realistic.
+    """
+    check if we're able to turn up or down based on active direction, 
+    we want to check if we can turn left or right at exact height so centery stays the sam,
+    and check by a full square.
+    """
+    if direction == 2 or direction == 3:
+        if 12 <= centerx % num2 <= 18: # 12 to 18 is mid-point of the tile, each tile is 30 wide.
+            if level[(centery + num3) // num1][centerx // num2] < 3:
+                turns[3] = True
+            if level[(centery - num3) // num1][centerx // num2] < 3:
+                turns[2] = True
+        if 12 <= centery % num1 <= 18: # 12 to 18 is mid-point of the tile, each tile is 30 height.
+            if level[centery // num1][(centerx - num2) // num2] < 3:
+                turns[1] = True
+            if level[centery // num1][(centerx + num2) // num2] < 3:
+                turns[0] = True
+
+    """
+    check if we're able to turn right or left based on active direction, 
+    we want to check if we can turn up or down at exact width so centerx stays the same,
+    and check by a full square.
+    """
+    if direction == 0 or direction == 1:
+        if 12 <= centerx % num2 <= 18:
+            if level[(centery + num1) // num1][centerx // num2] < 3:
+                turns[3] = True
+            if level[(centery - num1) // num1][centerx // num2] < 3:
+                turns[2] = True
+        if 12 <= centery % num1 <= 18:
+            if level[centery // num1][(centerx - num3) // num2] < 3:
+                turns[1] = True
+            if level[centery // num1][(centerx + num3) // num2] < 3:
+                turns[0] = True
+
+    else:
+        turns[0] = True
+        turns[1] = True
+
+    return turns
 
 
 
