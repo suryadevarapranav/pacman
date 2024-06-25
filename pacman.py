@@ -150,41 +150,41 @@ def check_position(centerx, centery):
             if level[(centery - num3) // num1][(centerx) // num2] < 3:
                 turns[2] = True
 
-    # can only turn if we're at the mid-point.
-    # fudge just to make the collisions look realistic.
-    """
-    check if we're able to turn up or down based on active direction, 
-    we want to check if we can turn left or right at exact height so centery stays the sam,
-    and check by a full square.
-    """
-    if direction == 2 or direction == 3:
-        if 12 <= centerx % num2 <= 18: # 12 to 18 is mid-point of the tile, each tile is 30 wide.
-            if level[(centery + num3) // num1][centerx // num2] < 3:
-                turns[3] = True
-            if level[(centery - num3) // num1][centerx // num2] < 3:
-                turns[2] = True
-        if 12 <= centery % num1 <= 18: # 12 to 18 is mid-point of the tile, each tile is 30 height.
-            if level[centery // num1][(centerx - num2) // num2] < 3:
-                turns[1] = True
-            if level[centery // num1][(centerx + num2) // num2] < 3:
-                turns[0] = True
+        # can only turn if we're at the mid-point.
+        # fudge just to make the collisions look realistic.
+        """
+        check if we're able to turn up or down based on active direction, 
+        we want to check if we can turn left or right at exact height so centery stays the sam,
+        and check by a full square.
+        """
+        if direction == 2 or direction == 3:
+            if 12 <= centerx % num2 <= 18: # 12 to 18 is mid-point of the tile, each tile is 30 wide.
+                if level[(centery + num3) // num1][centerx // num2] < 3:
+                    turns[3] = True
+                if level[(centery - num3) // num1][centerx // num2] < 3:
+                    turns[2] = True
+            if 12 <= centery % num1 <= 18: # 12 to 18 is mid-point of the tile, each tile is 30 height.
+                if level[centery // num1][(centerx - num2) // num2] < 3:
+                    turns[1] = True
+                if level[centery // num1][(centerx + num2) // num2] < 3:
+                    turns[0] = True
 
-    """
-    check if we're able to turn right or left based on active direction, 
-    we want to check if we can turn up or down at exact width so centerx stays the same,
-    and check by a full square.
-    """
-    if direction == 0 or direction == 1:
-        if 12 <= centerx % num2 <= 18:
-            if level[(centery + num1) // num1][centerx // num2] < 3:
-                turns[3] = True
-            if level[(centery - num1) // num1][centerx // num2] < 3:
-                turns[2] = True
-        if 12 <= centery % num1 <= 18:
-            if level[centery // num1][(centerx - num3) // num2] < 3:
-                turns[1] = True
-            if level[centery // num1][(centerx + num3) // num2] < 3:
-                turns[0] = True
+        """
+        check if we're able to turn right or left based on active direction, 
+        we want to check if we can turn up or down at exact width so centerx stays the same,
+        and check by a full square.
+        """
+        if direction == 0 or direction == 1:
+            if 12 <= centerx % num2 <= 18:
+                if level[(centery + num1) // num1][centerx // num2] < 3:
+                    turns[3] = True
+                if level[(centery - num1) // num1][centerx // num2] < 3:
+                    turns[2] = True
+            if 12 <= centery % num1 <= 18:
+                if level[centery // num1][(centerx - num3) // num2] < 3:
+                    turns[1] = True
+                if level[centery // num1][(centerx + num3) // num2] < 3:
+                    turns[0] = True
 
     else:
         turns[0] = True
@@ -253,7 +253,7 @@ while run:
             elif event.key == pygame.K_DOWN:
                 direction_command = 3
 
-        if event.type == pygame.KEYUP:
+        if event.type == pygame.KEYUP: # key release event
             if event.key == pygame.K_RIGHT and direction_command == 0:  # and the last direction command was for that key.
                 direction_command = direction
             if event.key == pygame.K_LEFT and direction_command == 1:
@@ -279,3 +279,12 @@ while run:
 
 
 pygame.quit()
+
+## FIXME's:
+
+"""
+1. Turning direction at any time and getting stuck - Fix: Turn only when the direction is a possibility.
+2. Game is being quit when going to the extremes. 
+
+----- Fixed by indenting code in the check_positions function.
+"""
