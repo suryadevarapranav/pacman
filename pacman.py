@@ -46,6 +46,18 @@ counter = 0
 # initialize the score to '0'
 score = 0
 
+# power-up is false at the start.
+powerup = False
+power_counter = 0
+# ghosts are all active at the start of the game.
+eaten_ghost = [False, False, False, False]
+
+# used at the start of the game
+startup_counter = 0
+moving = False # don't allow the movement for the startup_counter time.
+
+# initialize the lives for the player for everygame
+lives = 3
 
 # parsing out the board.
 def draw_board(lvl):
@@ -212,7 +224,7 @@ def move_player(play_x, play_y):
 
 
 # check to see if colliding with pieces.
-def check_collisions(scor):
+def check_collisions(scor, power, power_count, eaten_ghosts):
     num1 = (HEIGHT - 50) // 32
     num2 = WIDTH // 30
     if 0 < player_x < 870: # limits because these are the real positions, else off the screen.
@@ -222,12 +234,32 @@ def check_collisions(scor):
         if level[center_y // num1][center_x // num2] == 2: # power-up
             level[center_y // num1][center_x // num2] = 0 # power-up was eaten
             scor += 50
-    return scor
+            power = True
+            power_count = 0
+            eaten_ghosts = [False, False, False, False]
+    return scor, power, power_count, eaten_ghosts
+
 
 # display the player score, at any point in the game.
 def display_score():
     score_text = font.render(f'Score: {score}', True, 'white') # True is anit=alias, smooths out the edges.
     screen.blit(score_text, (10, 920)) # put the score on the screen.
+
+def powerup_indicator():
+    if powerup:
+        pygame.draw.circle(screen, 'purple', (140, 930), 15)
+
+# display the lives remaining
+def lives_indicator():
+    for i in range(lives):
+        screen.blit(pygame.transform.scale(player_images[0], (30, 30)), (650 + i * 40, 915))
+
+
+# place all the misc stuff
+def draw_misc():
+    display_score() # display the current score
+    powerup_indicator() # show an indicator that power-up is active
+    lives_indicator() # remaining lives in the game
 
 # Game Loop
 run = True
@@ -243,11 +275,26 @@ while run:
         counter = 0
         flicker = True
 
+    if powerup and power_counter < 600: # power up lasts for 10 seconds.
+        power_counter += 1
+    elif powerup and power_counter >= 600:
+        power_counter = 0
+        powerup = False
+        eaten_ghost = [False, False, False, False]
+
+    # give a 3 sec time to look at the game before it starts
+    if startup_counter < 180:
+        moving = False
+        startup_counter += 1
+    else:
+        moving = True
+
+
     screen.fill('black')  # Fill the entire background with the color black.
 
     draw_board(level)  # draw the pac-man level board.
     draw_player() # player in the house!!!
-    display_score() # display the player score.
+    draw_misc() # display all the misc stuff
 
     # pass in the center position of the player,
     center_x = player_x + 23
@@ -255,9 +302,12 @@ while run:
     # pygame.draw.circle(screen, 'red', (center_x, center_y), 2) # mark the center of the player pos.
 
     turns_allowed = check_position(center_x, center_y) # check for player pos and see if he's colliding based on that whether an action is possible.
-    player_x, player_y = move_player(player_x, player_y)
 
-    score = check_collisions(score)
+    # allow the player to move only if the moving is True
+    if moving:
+        player_x, player_y = move_player(player_x, player_y)
+
+    score, powerup, power_counter, eaten_ghost = check_collisions(score, powerup, power_counter, eaten_ghost)
 
     # Condition to exit the infinite while loop.
     for event in pygame.event.get():  # Built-in event handling the pygame module has.
