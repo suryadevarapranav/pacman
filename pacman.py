@@ -31,16 +31,41 @@ direction_command = 0
 # player speed
 player_speed = 2
 
+# load player_images
 player_images=[]
 for i in range(1, 5):
     player_images.append(pygame.transform.scale(pygame.image.load(f'assets/player_images/{i}.png'), (45, 45))) # load the player images and scale them.
 
+# load the ghost images
+blinky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/red.png'), (45, 45))
+pinky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/pink.png'), (45, 45))
+inky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/blue.png'), (45, 45))
+clyde_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/orange.png'), (45, 45))
+spooked_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/powerup.png'), (45, 45))
+dead_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/dead.png'), (45, 45))
+
+
 # player start position
 player_x = 450
 player_y = 663
-
 # initializing the player direction and the start image to 0
 direction = 0
+
+
+# initializing starting positions and directions for the ghosts
+blinky_x = 56
+blinky_y = 58
+blinky_direction = 0
+inky_x = 440
+inky_y = 388
+inky_direction = 2
+pinky_x = 440
+pinky_y = 438
+pinky_direction = 2
+clyde_x = 440
+clyde_y = 438
+clyde_direction = 2
+
 counter = 0
 
 # initialize the score to '0'
@@ -52,12 +77,37 @@ power_counter = 0
 # ghosts are all active at the start of the game.
 eaten_ghost = [False, False, False, False]
 
+# list of the ghost targets
+"""
+    if alive then its the player position
+    else if dead then the door to be revived
+    else if powerup phase then away from the player position.
+"""
+
+# ghost dead or not.
+blinky_dead = False
+inky_dead = False
+clyde_dead = False
+pinky_dead = False
+
+# ghost in the box or not.
+blinky_box = False
+inky_box = False
+clyde_box = False
+pinky_box = False
+
+# initialize the ghost speed
+ghost_speed = 2
+
 # used at the start of the game
 startup_counter = 0
 moving = False # don't allow the movement for the startup_counter time.
 
-# initialize the lives for the player for everygame
+# initialize the lives for the player for every game
 lives = 3
+
+
+
 
 # parsing out the board.
 def draw_board(lvl):
