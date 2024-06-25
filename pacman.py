@@ -43,6 +43,9 @@ player_y = 663
 direction = 0
 counter = 0
 
+# initialize the score to '0'
+score = 0
+
 
 # parsing out the board.
 def draw_board(lvl):
@@ -208,6 +211,23 @@ def move_player(play_x, play_y):
     return play_x, play_y
 
 
+# check to see if colliding with pieces.
+def check_collisions(scor):
+    num1 = (HEIGHT - 50) // 32
+    num2 = WIDTH // 30
+    if 0 < player_x < 870: # limits because these are the real positions, else off the screen.
+        if level[center_y // num1][center_x // num2] == 1: # dot.
+            level[center_y // num1][center_x // num2] = 0 # dot was eaten
+            scor += 10
+        if level[center_y // num1][center_x // num2] == 2: # power-up
+            level[center_y // num1][center_x // num2] = 0 # power-up was eaten
+            scor += 50
+    return scor
+
+# display the player score, at any point in the game.
+def display_score():
+    score_text = font.render(f'Score: {score}', True, 'white') # True is anit=alias, smooths out the edges.
+    screen.blit(score_text, (10, 920)) # put the score on the screen.
 
 # Game Loop
 run = True
@@ -227,6 +247,7 @@ while run:
 
     draw_board(level)  # draw the pac-man level board.
     draw_player() # player in the house!!!
+    display_score() # display the player score.
 
     # pass in the center position of the player,
     center_x = player_x + 23
@@ -235,6 +256,8 @@ while run:
 
     turns_allowed = check_position(center_x, center_y) # check for player pos and see if he's colliding based on that whether an action is possible.
     player_x, player_y = move_player(player_x, player_y)
+
+    score = check_collisions(score)
 
     # Condition to exit the infinite while loop.
     for event in pygame.event.get():  # Built-in event handling the pygame module has.
