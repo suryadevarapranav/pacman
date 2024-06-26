@@ -83,6 +83,7 @@ eaten_ghost = [False, False, False, False]
     else if dead then the door to be revived
     else if powerup phase then away from the player position.
 """
+targets = [(player_x, player_y), (player_x, player_y), (player_x, player_y), (player_x, player_y)]
 
 # ghost dead or not.
 blinky_dead = False
@@ -106,7 +107,42 @@ moving = False # don't allow the movement for the startup_counter time.
 # initialize the lives for the player for every game
 lives = 3
 
+class Ghost:
+    def __init__(self, x_coord, y_coord, target, speed, img, direct, dead, box, id):
+        self.x_pos = x_coord
+        self.y_pos = y_coord
+        self.center_x = self.x_pos + 22
+        self.center_y = self.y_pos + 22
+        self.target = target
+        self.speed = speed
+        self.img = img
+        self.direction = direct
+        self.dead = dead
+        self.in_box = box
+        self.id = id
+        self.turns, self.in_box = self.check_collisions()
+        self.rect = self.draw() # outline of the ghost's collision box.
 
+    def draw(self):
+
+        # ghost in it's usual form.
+        if (not powerup and not self.dead) or (eaten_ghost[self.id] and powerup and not self.dead):
+            screen.blit(self.img, (self.x_pos, self.y_pos))
+        # spooked image of the ghost, player has a powerup.
+        elif powerup and not self.dead and not eaten_ghost[self.id]:
+            screen.blit(spooked_img, (self.x_pos, self.y_pos))
+        # dead ghost
+        else:
+            screen.blit(dead_img, (self.x_pos, self.y_pos))
+
+        ghost_rect = pygame.rect.Rect((self.center_x - 18, self.center_y - 18), (36, 36)) # x,y co-ordinates of where to start, x,y size of the shape.
+
+        return ghost_rect
+
+    def check_collisions(self):
+        self.turns = [False, False, False, False]
+        self.in_box = True
+        return self.turns, self.in_box
 
 
 # parsing out the board.
@@ -345,6 +381,17 @@ while run:
     draw_board(level)  # draw the pac-man level board.
     draw_player() # player in the house!!!
     draw_misc() # display all the misc stuff
+
+    # Initialize the ghosts
+    blinky = Ghost(blinky_x, blinky_y, targets[0], ghost_speed, blinky_img, blinky_direction, blinky_dead,
+                   blinky_box, 0)
+    inky = Ghost(inky_x, inky_y, targets[1], ghost_speed, inky_img, inky_direction, inky_dead,
+                 inky_box, 1)
+    pinky = Ghost(pinky_x, pinky_y, targets[2], ghost_speed, pinky_img, pinky_direction, pinky_dead,
+                  pinky_box, 2)
+    clyde = Ghost(clyde_x, clyde_y, targets[3], ghost_speed, clyde_img, clyde_direction, clyde_dead,
+                  clyde_box, 3)
+
 
     # pass in the center position of the player,
     center_x = player_x + 23
