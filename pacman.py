@@ -3,7 +3,7 @@ from board import boards
 import pygame
 import math
 
-#
+# initialize all imported pygame modules
 pygame.init()
 
 # import PI
@@ -140,8 +140,78 @@ class Ghost:
         return ghost_rect
 
     def check_collisions(self):
+        # R, L, U, D
+        num1 = ((HEIGHT - 50) // 32)
+        num2 = (WIDTH // 30)
+        num3 = 15
         self.turns = [False, False, False, False]
-        self.in_box = True
+        if 0 < self.center_x // 30 < 29:
+            if level[(self.center_y - num3) // num1][self.center_x // num2] == 9:
+                self.turns[2] = True
+            if level[self.center_y // num1][(self.center_x - num3) // num2] < 3 \
+                    or (level[self.center_y // num1][(self.center_x - num3) // num2] == 9 and (
+                    self.in_box or self.dead)): # even though ghosts can't eat dots, it's their valid pathing
+                self.turns[1] = True
+            if level[self.center_y // num1][(self.center_x + num3) // num2] < 3 \
+                    or (level[self.center_y // num1][(self.center_x + num3) // num2] == 9 and (
+                    self.in_box or self.dead)):
+                self.turns[0] = True
+            if level[(self.center_y + num3) // num1][self.center_x // num2] < 3 \
+                    or (level[(self.center_y + num3) // num1][self.center_x // num2] == 9 and (
+                    self.in_box or self.dead)):
+                self.turns[3] = True
+            if level[(self.center_y - num3) // num1][self.center_x // num2] < 3 \
+                    or (level[(self.center_y - num3) // num1][self.center_x // num2] == 9 and (
+                    self.in_box or self.dead)):
+                self.turns[2] = True
+
+            if self.direction == 2 or self.direction == 3:
+                if 12 <= self.center_x % num2 <= 18:
+                    if level[(self.center_y + num3) // num1][self.center_x // num2] < 3 \
+                            or (level[(self.center_y + num3) // num1][self.center_x // num2] == 9 and (
+                            self.in_box or self.dead)):
+                        self.turns[3] = True
+                    if level[(self.center_y - num3) // num1][self.center_x // num2] < 3 \
+                            or (level[(self.center_y - num3) // num1][self.center_x // num2] == 9 and (
+                            self.in_box or self.dead)):
+                        self.turns[2] = True
+                if 12 <= self.center_y % num1 <= 18:
+                    if level[self.center_y // num1][(self.center_x - num2) // num2] < 3 \
+                            or (level[self.center_y // num1][(self.center_x - num2) // num2] == 9 and (
+                            self.in_box or self.dead)):
+                        self.turns[1] = True
+                    if level[self.center_y // num1][(self.center_x + num2) // num2] < 3 \
+                            or (level[self.center_y // num1][(self.center_x + num2) // num2] == 9 and (
+                            self.in_box or self.dead)):
+                        self.turns[0] = True
+
+            if self.direction == 0 or self.direction == 1:
+                if 12 <= self.center_x % num2 <= 18:
+                    if level[(self.center_y + num3) // num1][self.center_x // num2] < 3 \
+                            or (level[(self.center_y + num3) // num1][self.center_x // num2] == 9 and (
+                            self.in_box or self.dead)):
+                        self.turns[3] = True
+                    if level[(self.center_y - num3) // num1][self.center_x // num2] < 3 \
+                            or (level[(self.center_y - num3) // num1][self.center_x // num2] == 9 and (
+                            self.in_box or self.dead)):
+                        self.turns[2] = True
+                if 12 <= self.center_y % num1 <= 18:
+                    if level[self.center_y // num1][(self.center_x - num3) // num2] < 3 \
+                            or (level[self.center_y // num1][(self.center_x - num3) // num2] == 9 and (
+                            self.in_box or self.dead)):
+                        self.turns[1] = True
+                    if level[self.center_y // num1][(self.center_x + num3) // num2] < 3 \
+                            or (level[self.center_y // num1][(self.center_x + num3) // num2] == 9 and (
+                            self.in_box or self.dead)):
+                        self.turns[0] = True
+        else: # allow ghosts to travel across the screen.
+            self.turns[0] = True
+            self.turns[1] = True
+
+        if 350 < self.x_pos < 550 and 370 < self.y_pos < 480: # checking if the ghost is inside the box.
+            self.in_box = True
+        else:
+            self.in_box = False
         return self.turns, self.in_box
 
 
@@ -375,7 +445,6 @@ while run:
     else:
         moving = True
 
-
     screen.fill('black')  # Fill the entire background with the color black.
 
     draw_board(level)  # draw the pac-man level board.
@@ -391,7 +460,6 @@ while run:
                   pinky_box, 2)
     clyde = Ghost(clyde_x, clyde_y, targets[3], ghost_speed, clyde_img, clyde_direction, clyde_dead,
                   clyde_box, 3)
-
 
     # pass in the center position of the player,
     center_x = player_x + 23
@@ -437,7 +505,6 @@ while run:
         if direction_command == i and turns_allowed[i]:
             direction = i
 
-
     # player moves across the screen
     if player_x > 900:
         player_x = -47
@@ -446,8 +513,7 @@ while run:
 
     pygame.display.flip()
 
-
-
+# un-initialize all pygame modules
 pygame.quit()
 
 ## FIXME's:
