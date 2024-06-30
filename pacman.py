@@ -97,8 +97,8 @@ inky_box = False
 clyde_box = False
 pinky_box = False
 
-# initialize the ghost speed
-ghost_speed = 2
+# initialize the ghost speeds
+ghost_speeds = [2, 2, 2, 2]
 
 # used at the start of the game
 startup_counter = 0
@@ -715,19 +715,43 @@ while run:
     center_y = player_y + 24
     # pygame.draw.circle(screen, 'red', (center_x, center_y), 2) # mark the center of the player pos.
 
+    # vary the ghost speeds based on gameplay
+    if powerup: # show ghost speed during power-up
+        ghost_speeds = [1, 1, 1, 1]
+    else:
+        ghost_speeds = [2, 2, 2, 2]
+
+    if eaten_ghost[0]:
+        ghost_speeds[0] = 2
+    if eaten_ghost[1]:
+        ghost_speeds[1] = 2
+    if eaten_ghost[2]:
+        ghost_speeds[2] = 2
+    if eaten_ghost[3]:
+        ghost_speeds[3] = 2
+
+    if blinky_dead:
+        ghost_speeds[0] = 4
+    if inky_dead:
+        ghost_speeds[1] = 4
+    if pinky_dead:
+        ghost_speeds[2] = 4
+    if clyde_dead:
+        ghost_speeds[3] = 4
+
     draw_player() # player in the house!!!
 
     # player hit box to eat a ghost/player losing a life.
     player_circle = pygame.draw.circle(screen, 'black', (center_x, center_y), 20, 2)
 
     # Initialize the ghosts
-    blinky = Ghost(blinky_x, blinky_y, targets[0], ghost_speed, blinky_img, blinky_direction, blinky_dead,
+    blinky = Ghost(blinky_x, blinky_y, targets[0], ghost_speeds[0], blinky_img, blinky_direction, blinky_dead,
                    blinky_box, 0)
-    inky = Ghost(inky_x, inky_y, targets[1], ghost_speed, inky_img, inky_direction, inky_dead,
+    inky = Ghost(inky_x, inky_y, targets[1], ghost_speeds[1], inky_img, inky_direction, inky_dead,
                  inky_box, 1)
-    pinky = Ghost(pinky_x, pinky_y, targets[2], ghost_speed, pinky_img, pinky_direction, pinky_dead,
+    pinky = Ghost(pinky_x, pinky_y, targets[2], ghost_speeds[2], pinky_img, pinky_direction, pinky_dead,
                   pinky_box, 2)
-    clyde = Ghost(clyde_x, clyde_y, targets[3], ghost_speed, clyde_img, clyde_direction, clyde_dead,
+    clyde = Ghost(clyde_x, clyde_y, targets[3], ghost_speeds[3], clyde_img, clyde_direction, clyde_dead,
                   clyde_box, 3)
 
     draw_misc() # display all the misc stuff
