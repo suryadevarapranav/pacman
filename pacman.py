@@ -1,4 +1,5 @@
 # Pac-Man
+import copy
 from board import boards
 import pygame
 import math
@@ -17,7 +18,7 @@ screen = pygame.display.set_mode([WIDTH, HEIGHT])
 timer = pygame.time.Clock()  # Speed at which the game is played.
 fps = 60  # Max Speed at which the game could be played.
 font = pygame.font.Font('freesansbold.ttf', 20)  # Font to display the text in.
-level = boards
+level = copy.deepcopy(boards) # deepcopy copies the entire list but leaves the orignial intact.
 color = 'blue'
 
 # flicker the powerup points.
@@ -106,6 +107,9 @@ moving = False # don't allow the movement for the startup_counter time.
 
 # initialize the lives for the player for every game
 lives = 3
+
+game_over = False
+game_won = False
 
 class Ghost:
     def __init__(self, x_coord, y_coord, target, speed, img, direct, dead, box, id):
@@ -926,12 +930,29 @@ def lives_indicator():
     for i in range(lives):
         screen.blit(pygame.transform.scale(player_images[0], (30, 30)), (650 + i * 40, 915))
 
+def game_lost():
+    if game_over:
+        pygame.draw.rect(screen, 'white', [50, 200, 800, 300], 0, 10)
+        pygame.draw.rect(screen, 'dark gray', [70, 220, 760, 260], 0, 10)
+        gameover_text = font.render('Game over! Space bar to restart!', True, 'red')
+        screen.blit(gameover_text, (100, 300))
+
+def game_victory():
+    if game_won:
+        pygame.draw.rect(screen, 'white', [50, 200, 800, 300], 0, 10)
+        pygame.draw.rect(screen, 'dark gray', [70, 220, 760, 260], 0, 10)
+        gameover_text = font.render('Victory! Space bar to restart!', True, 'green')
+        screen.blit(gameover_text, (100, 300))
+
 
 # place all the misc stuff
 def draw_misc():
     display_score() # display the current score
     powerup_indicator() # show an indicator that power-up is active
     lives_indicator() # remaining lives in the game
+    game_lost() # game over display
+    game_victory() # game won display
+
 
 # determine the targets of every ghost.
 def get_targets(blink_x, blink_y, ink_x, ink_y, pink_x, pink_y, clyd_x, clyd_y):
@@ -1052,7 +1073,7 @@ while run:
         eaten_ghost = [False, False, False, False]
 
     # give a 3 sec time to look at the game before it starts
-    if startup_counter < 180:
+    if startup_counter < 180 and not game_over and not game_won:
         moving = False
         startup_counter += 1
     else:
@@ -1090,6 +1111,11 @@ while run:
         ghost_speeds[2] = 4
     if clyde_dead:
         ghost_speeds[3] = 4
+
+    game_won = True
+    for i in range(len(level)):
+        if 1 in level[i] or 2 in level[i]:
+            game_won = False
 
     draw_player() # player in the house!!!
 
@@ -1343,6 +1369,37 @@ while run:
                 direction_command = 2
             elif event.key == pygame.K_DOWN:
                 direction_command = 3
+            if event.key == pygame.K_SPACE and (game_over or game_won): # restart the game.
+                powerup = False
+                power_counter = 0
+                lives -= 1
+                startup_counter = 0
+                player_x = 450
+                player_y = 663
+                direction = 0
+                direction_command = 0
+                blinky_x = 56
+                blinky_y = 58
+                blinky_direction = 0
+                inky_x = 440
+                inky_y = 388
+                inky_direction = 2
+                pinky_x = 440
+                pinky_y = 438
+                pinky_direction = 2
+                clyde_x = 440
+                clyde_y = 438
+                clyde_direction = 2
+                eaten_ghost = [False, False, False, False]
+                blinky_dead = False
+                inky_dead = False
+                clyde_dead = False
+                pinky_dead = False
+                score = 0
+                lives = 3
+                level = copy.deepcopy(boards)
+                game_over = False
+                game_won = False
 
         if event.type == pygame.KEYUP: # key release event
             if event.key == pygame.K_RIGHT and direction_command == 0:  # and the last direction command was for that key.
@@ -1381,5 +1438,3 @@ while run:
 
 # un-initialize all pygame modules
 pygame.quit()
-
-## FIXME's:
